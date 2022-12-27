@@ -3,15 +3,14 @@ package view;
 import controller.Controller;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class MainFrame extends JFrame implements ActionListener {
     private javax.swing.JButton createNewInvoiceBtn;
-    private javax.swing.JButton deleteBtn;
-    private javax.swing.JButton saveBtn;
-    private javax.swing.JButton cancelBtn;
+    private javax.swing.JButton deleteInvoiceBtn;
+    private javax.swing.JButton createItemBtn;
+    private javax.swing.JButton deleteItemBtn;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -42,7 +41,7 @@ public class MainFrame extends JFrame implements ActionListener {
         jScrollPane1 = new javax.swing.JScrollPane();
         invoicesTable = new javax.swing.JTable();
         createNewInvoiceBtn = new javax.swing.JButton();
-        deleteBtn = new javax.swing.JButton();
+        deleteInvoiceBtn = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -55,8 +54,8 @@ public class MainFrame extends JFrame implements ActionListener {
         jPanel3 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         itemsTable = new javax.swing.JTable();
-        saveBtn = new javax.swing.JButton();
-        cancelBtn = new javax.swing.JButton();
+        createItemBtn = new javax.swing.JButton();
+        deleteItemBtn = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         loadFileBtn = new javax.swing.JMenuItem();
@@ -84,8 +83,8 @@ public class MainFrame extends JFrame implements ActionListener {
         createNewInvoiceBtn.setText("Create New Invoice");
         createNewInvoiceBtn.addActionListener(this);
 
-        deleteBtn.setText("Delete Invoice ");
-        deleteBtn.addActionListener(this);
+        deleteInvoiceBtn.setText("Delete Invoice ");
+        deleteInvoiceBtn.addActionListener(this);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -105,7 +104,7 @@ public class MainFrame extends JFrame implements ActionListener {
                                 .addGap(143, 143, 143)
                                 .addComponent(createNewInvoiceBtn)
                                 .addGap(64, 64, 64)
-                                .addComponent(deleteBtn)
+                                .addComponent(deleteInvoiceBtn)
                                 .addContainerGap(108, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -118,7 +117,7 @@ public class MainFrame extends JFrame implements ActionListener {
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(createNewInvoiceBtn)
-                                        .addComponent(deleteBtn))
+                                        .addComponent(deleteInvoiceBtn))
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -140,7 +139,6 @@ public class MainFrame extends JFrame implements ActionListener {
                         "No.", "Item Name", "Item Price", "Count", "Item Total"
                 }
         ));
-        itemsTable.setEnabled(false);
         jScrollPane2.setViewportView(itemsTable);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -160,11 +158,11 @@ public class MainFrame extends JFrame implements ActionListener {
                                 .addContainerGap())
         );
 
-        saveBtn.setText("Save");
-        saveBtn.addActionListener(this);
+        createItemBtn.setText("Create Item");
+        createItemBtn.addActionListener(this);
 
-        cancelBtn.setText("Cancel");
-        cancelBtn.addActionListener(this);
+        deleteItemBtn.setText("Delete Item");
+        deleteItemBtn.addActionListener(this);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -192,9 +190,9 @@ public class MainFrame extends JFrame implements ActionListener {
                                 .addContainerGap())
                         .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addGap(165, 165, 165)
-                                .addComponent(saveBtn)
+                                .addComponent(createItemBtn)
                                 .addGap(58, 58, 58)
-                                .addComponent(cancelBtn)
+                                .addComponent(deleteItemBtn)
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -220,8 +218,8 @@ public class MainFrame extends JFrame implements ActionListener {
                                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(saveBtn)
-                                        .addComponent(cancelBtn))
+                                        .addComponent(createItemBtn)
+                                        .addComponent(deleteItemBtn))
                                 .addContainerGap(18, Short.MAX_VALUE))
         );
 
@@ -259,38 +257,39 @@ public class MainFrame extends JFrame implements ActionListener {
         pack();
         setLocation(200,200);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    }
 
-        //Read the 2 CSV files and display the data in invoices table once booting
-        controller.readFiles();
-        controller.displayInvoicesTable(invoicesTable);
+    public JTable getInvoicesTable() {
+        return invoicesTable;
     }
 
     public static void main(String[] args) {
-        new MainFrame().setVisible(true);
+
+        MainFrame frame=new MainFrame();
+        frame.setVisible(true);
+        frame.controller.load(frame.getInvoicesTable());
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource().equals(deleteBtn)) {
-            controller.deleteRecord(invoicesTable);
+        if(e.getSource().equals(deleteInvoiceBtn)) {
+            controller.deleteInvoice(invoicesTable);
 
-        }else if(e.getSource().equals(cancelBtn)){
-            controller.cancel(invoicesTable,date,customerName);
+        }else if(e.getSource().equals(deleteItemBtn)){
+            controller.deleteItem(itemsTable);
 
         }else if(e.getSource().equals(loadFileBtn)){
-            DefaultTableModel model=(DefaultTableModel) invoicesTable.getModel();
-            model.setNumRows(0);
-            controller.loadFile();
-            controller.displayInvoicesTable(invoicesTable);
-
-        }else if(e.getSource().equals(saveBtn)){
-            controller.save( invoicesTable, invoiceNumber, date, customerName);
+            controller.load(invoicesTable);
 
         }else if(e.getSource().equals(saveFileBtn)){
                 controller.saveFile();
 
         }else if(e.getSource().equals(createNewInvoiceBtn)){
             new NewInvoiceFrame().setVisible(true);
+
+        }else if(e.getSource().equals(createItemBtn)){
+               new CreateItemFrame().setVisible(true);
+
         }
     }
 

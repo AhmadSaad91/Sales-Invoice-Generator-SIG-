@@ -1,8 +1,6 @@
 package controller;
 
-import model.FileOperations;
-import model.InvoiceHeader;
-import model.InvoiceLine;
+import model.*;
 
 
 import javax.swing.*;
@@ -14,19 +12,38 @@ public class Controller {
     private static ArrayList<InvoiceHeader> invoices;
     private ArrayList<InvoiceLine> items=new ArrayList<>();
 
+
     //methods used in MainFrame
-    public void readFiles(){
+    public void load(JTable invoicesTable){
         try {
             invoices = fileOperations.readFile();
-        }catch (Exception e){
-            System.out.println("File Not Found");
+            displayInvoicesTable(invoicesTable);
+        }catch (WrongFileFormatException e){
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Wrong File Format",
+                    "ERROR",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            e.printStackTrace();
+        }catch (WrongDateFormatException e){
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Wrong Date Format",
+                    "ERROR",
+                    JOptionPane.ERROR_MESSAGE
+            );
+            e.printStackTrace();
+        } catch(Exception e){
 
+            e.printStackTrace();
         }
     }
 
     public void displayInvoicesTable(JTable invoicesTable) {
         try {
             DefaultTableModel model = (DefaultTableModel) invoicesTable.getModel();
+            model.setNumRows(0);
             Object rowData[] = new Object[4];
             for (int i = 0; i < invoices.size(); i++) {
                 rowData[0] = invoices.get(i).getInvoiceNum();
@@ -37,13 +54,6 @@ public class Controller {
             }
         }catch(NullPointerException e){
             e.printStackTrace();
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Wrong Date or File Format",
-                    "ERROR",
-                    JOptionPane.ERROR_MESSAGE
-            );
-
         }
     }
 
@@ -82,7 +92,7 @@ public class Controller {
         }
     }
 
-    public void deleteRecord(JTable invoicesTable){
+    public void deleteInvoice(JTable invoicesTable){
         DefaultTableModel model=(DefaultTableModel) invoicesTable.getModel();
 
         if(invoicesTable.getSelectedRowCount()==1) {
@@ -117,95 +127,8 @@ public class Controller {
 
     }
 
-    public void loadFile(){
-
-        readFiles();
-    }
-
-    public void save(JTable invoicesTable,JLabel invoiceNumber,JTextField date,JTextField customerName){
-
-        DefaultTableModel model=(DefaultTableModel) invoicesTable.getModel();
-
-        if(invoicesTable.getSelectedRowCount()==1) {
-            String iN=invoiceNumber.getText();
-            String d=date.getText();
-            String cN=customerName.getText();
-
-            if(!(date.getText().matches("\\d{2}-\\d{2}-\\d{4}"))){
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Enter Date Format dd-mm-yyyy",
-                        "ERROR",
-                        JOptionPane.ERROR_MESSAGE
-                );
-            }else if(customerName.getText().equals("")) {
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Please Enter Customer Name",
-                        "ERROR",
-                        JOptionPane.ERROR_MESSAGE
-                );
-            }else{
-                model.setValueAt(d, invoicesTable.getSelectedRow(), 1);
-                model.setValueAt(cN, invoicesTable.getSelectedRow(), 2);
-
-                for (int i = 0; i < invoices.size(); i++) {
-                    if ((invoices.get(i).getInvoiceNum()) == Integer.parseInt(iN)) {
-                        invoices.get(i).setInvoiceDate(d);
-                        invoices.get(i).setCustomerName(cN);
-                    }
-                }
-
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Invoice Updated Successfully",
-                        "Information",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-            }
-        }else if(invoicesTable.getRowCount()==0){
-            JOptionPane.showMessageDialog(
-                    null,
-                    "No invoices available",
-                    "Warning",
-                    JOptionPane.WARNING_MESSAGE
-            );
-        }else if(invoicesTable.getSelectedRowCount()==0){
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Please select one record",
-                    "Warning",
-                    JOptionPane.WARNING_MESSAGE
-            );
-        }
-
-    }
-
-    public void cancel(JTable invoicesTable,JTextField date,JTextField customerName){
-        DefaultTableModel model=(DefaultTableModel) invoicesTable.getModel();
-
-        if(invoicesTable.getSelectedRowCount()==1){
-            date.setText(model.getValueAt(invoicesTable.getSelectedRow(),1).toString());
-            customerName.setText(model.getValueAt(invoicesTable.getSelectedRow(),2).toString());
-        }else if(invoicesTable.getRowCount()==0){
-            JOptionPane.showMessageDialog(
-                    null,
-                    "No invoices available",
-                    "Warning",
-                    JOptionPane.WARNING_MESSAGE
-            );
-        }else if(invoicesTable.getSelectedRowCount()==0){
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Please select one record",
-                    "Warning",
-                    JOptionPane.WARNING_MESSAGE
-            );
-        }
-
-    }
-
     public void saveFile() {
+
         try {
             fileOperations.writeFile(invoices);
             JOptionPane.showMessageDialog(
@@ -216,18 +139,58 @@ public class Controller {
             );
         }catch (Exception e){
             e.printStackTrace();
+            }
+    }
+
+    public void deleteItem(JTable itemsTable){
+
+        DefaultTableModel model=(DefaultTableModel) itemsTable.getModel();
+
+        if(itemsTable.getSelectedRowCount()==1) {
+
+            String iN=model.getValueAt(itemsTable.getSelectedRow(),0).toString();
+            String itemName=model.getValueAt(itemsTable.getSelectedRow(),1).toString();
+
+            for (int i = 0; i < invoices.size(); i++) {
+                if ((invoices.get(i).getInvoiceNum()) == Integer.parseInt(iN)) {
+                    for(int j=0;j<invoices.get(i).getItems().size();j++){
+                        if(invoices.get(i).getItems().get(j).getItemName().equals(itemName)){
+                            invoices.get(i).getItems().remove(j);
+                            model.removeRow(itemsTable.getSelectedRow());
+                            JOptionPane.showMessageDialog(
+                                    null,
+                                    "Item Deleted Successfully",
+                                    "Information",
+                                    JOptionPane.INFORMATION_MESSAGE
+                            );
+                        }
+                    }
+                }
+            }
+
+        }else if(itemsTable.getRowCount()==0){
             JOptionPane.showMessageDialog(
                     null,
-                    "File Not Found",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
+                    "Please select one invoice",
+                    "Warning",
+                    JOptionPane.WARNING_MESSAGE
             );
-            }
+
+        }else if(itemsTable.getSelectedRowCount()==0){
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Please select one item",
+                    "Warning",
+                    JOptionPane.WARNING_MESSAGE
+            );
+        }
+
     }
 
 
     //methods used in NewInvoiceFrame
     public void addItem(JTextField invoiceNumber,JTextField itemName,JTextField price,JTextField count){
+
         if(invoiceNumber.getText().equals("")){
             JOptionPane.showMessageDialog(
                     null,
@@ -252,7 +215,7 @@ public class Controller {
         }else if(count.getText().equals("") || Integer.parseInt(count.getText())<1){
             JOptionPane.showMessageDialog(
                     null,
-                    "Please Enter Atleast One Count",
+                    "Please Enter at least One Count",
                     "ERROR",
                     JOptionPane.ERROR_MESSAGE
             );
@@ -271,18 +234,19 @@ public class Controller {
         }
     }
     public void confirmNewInvoice(JTextField invoiceNumber,JTextField date,JTextField customerName,JFrame frame){
-        if(!(date.getText().matches("\\d{2}-\\d{2}-\\d{4}"))) {
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Enter Date Format dd-mm-yyyy",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
-        }else if(invoiceNumber.getText().equals("")) {
+
+        if(invoiceNumber.getText().equals("")) {
             JOptionPane.showMessageDialog(
                     null,
                     "Please Enter Invoice Number",
                     "ERROR",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }else if(!(date.getText().matches("\\d{2}-\\d{2}-\\d{4}"))) {
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Enter Date Format dd-mm-yyyy",
+                    "Error",
                     JOptionPane.ERROR_MESSAGE
             );
         }else if(customerName.getText().equals("")) {
@@ -295,7 +259,7 @@ public class Controller {
         }else if(items.isEmpty()){
             JOptionPane.showMessageDialog(
                     null,
-                    "Please Select item(s)",
+                    "Please Add item(s)",
                     "ERROR",
                     JOptionPane.ERROR_MESSAGE
             );
@@ -312,5 +276,58 @@ public class Controller {
         }
     }
 
+    //methods used in CreateItemFrame
+
+    public void confirmNewItem(JTextField invoiceNum,JTextField itemName,JTextField price,JTextField count,JFrame frame) {
+
+        if(invoiceNum.getText().equals("")){
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Please Enter Invoice Number",
+                    "ERROR",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }else if(itemName.getText().equals("")){
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Please Enter Item Name",
+                    "ERROR",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }else if(price.getText().equals("") || Double.parseDouble(price.getText())<1){
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Please Enter Valid Item Price",
+                    "ERROR",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }else if(count.getText().equals("") || Integer.parseInt(count.getText())<1){
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Please Enter at least One Count",
+                    "ERROR",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }else {
+
+           InvoiceLine item=new InvoiceLine(Integer.parseInt(invoiceNum.getText()),itemName.getText(),
+                   Double.parseDouble(price.getText()),Integer.parseInt(count.getText()));
+           for(InvoiceHeader e:invoices){
+               if(e.getInvoiceNum()==Integer.parseInt(invoiceNum.getText())){
+                   e.getItems().add(item);
+                   JOptionPane.showMessageDialog(
+                           null,
+                           "Item added successfully",
+                           "Information",
+                           JOptionPane.INFORMATION_MESSAGE
+                   );
+
+                   frame.setVisible(false);
+               }
+           }
+
+        }
+
+    }
 
 }

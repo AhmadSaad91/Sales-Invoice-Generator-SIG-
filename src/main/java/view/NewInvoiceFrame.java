@@ -146,7 +146,7 @@ public class NewInvoiceFrame extends JFrame implements ActionListener {
 
         }else if(e.getSource().equals(confirmBtn)){
             controller2.confirmNewInvoice(invoiceNumber,date,customerName,this);
-            //this.setVisible(false);
+
         }
     }
 }
