@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class MainFrame extends JFrame implements ActionListener {
+public  class MainFrame extends JFrame implements ActionListener {
     private javax.swing.JButton createNewInvoiceBtn;
     private javax.swing.JButton deleteInvoiceBtn;
     private javax.swing.JButton createItemBtn;
@@ -31,9 +31,10 @@ public class MainFrame extends JFrame implements ActionListener {
     private javax.swing.JTable itemsTable;
     private javax.swing.JTextField date;
     private javax.swing.JTextField customerName;
+    private static MainFrame frame=new MainFrame();
     private Controller controller=new Controller();
 
-    public MainFrame() {
+    private MainFrame() {
         super("Sales Invoice Generator (SIG)");
 
         jPanel1 = new javax.swing.JPanel();
@@ -257,15 +258,36 @@ public class MainFrame extends JFrame implements ActionListener {
         pack();
         setLocation(200,200);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+
+    }
+    public static MainFrame getInstance(){
+        return frame;
     }
 
     public JTable getInvoicesTable() {
         return invoicesTable;
     }
+    public JLabel getInvoiceNumber() {
+        return invoiceNumber;
+    }
+    public JLabel getInvoiceTotal() {
+        return invoiceTotal;
+    }
+
+    public JTable getItemsTable() {
+        return itemsTable;
+    }
+
+    public JTextField getDate() {
+        return date;
+    }
+
+    public JTextField getCustomerName() {
+        return customerName;
+    }
 
     public static void main(String[] args) {
-
-        MainFrame frame=new MainFrame();
         frame.setVisible(true);
         frame.controller.load(frame.getInvoicesTable());
     }
@@ -273,11 +295,12 @@ public class MainFrame extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource().equals(deleteInvoiceBtn)) {
-            controller.deleteInvoice(invoicesTable);
+            controller.deleteInvoice(invoicesTable, invoiceNumber,  date,  customerName
+                    ,  invoiceTotal,  itemsTable);
 
         }else if(e.getSource().equals(deleteItemBtn)){
-            controller.deleteItem(itemsTable);
-
+            controller.deleteItem(itemsTable,invoiceTotal);
+            controller.displayInvoicesTable(invoicesTable);
         }else if(e.getSource().equals(loadFileBtn)){
             controller.load(invoicesTable);
 

@@ -104,6 +104,9 @@ public class CreateItemFrame extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-       controller3.confirmNewItem(invoiceNum,itemName,price,count,this);
+        MainFrame frame=MainFrame.getInstance();
+       controller3.confirmNewItem(invoiceNum,itemName,price,count,this,frame.getInvoicesTable(),
+                                  frame.getInvoiceNumber(),frame.getDate(),frame.getCustomerName(),
+                                  frame.getInvoiceTotal(),frame.getItemsTable());
     }
 }

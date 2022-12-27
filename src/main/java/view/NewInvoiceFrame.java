@@ -24,6 +24,7 @@ public class NewInvoiceFrame extends JFrame implements ActionListener {
     private Controller controller2=new Controller();
 
 
+
     public NewInvoiceFrame(){
         super("CREATE NEW INVOICE");
 
@@ -145,7 +146,8 @@ public class NewInvoiceFrame extends JFrame implements ActionListener {
             controller2.addItem( invoiceNumber, itemName, price, count);
 
         }else if(e.getSource().equals(confirmBtn)){
-            controller2.confirmNewInvoice(invoiceNumber,date,customerName,this);
+            MainFrame frame=MainFrame.getInstance();
+            controller2.confirmNewInvoice(invoiceNumber,date,customerName,this,frame.getInvoicesTable());
 
         }
     }

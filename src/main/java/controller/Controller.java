@@ -92,7 +92,8 @@ public class Controller {
         }
     }
 
-    public void deleteInvoice(JTable invoicesTable){
+    public void deleteInvoice(JTable invoicesTable,JLabel invoiceNumber, JTextField date, JTextField customerName
+                            , JLabel invoiceTotal, JTable itemsTable){
         DefaultTableModel model=(DefaultTableModel) invoicesTable.getModel();
 
         if(invoicesTable.getSelectedRowCount()==1) {
@@ -109,6 +110,12 @@ public class Controller {
                     "Information",
                     JOptionPane.INFORMATION_MESSAGE
             );
+            DefaultTableModel model2=(DefaultTableModel) itemsTable.getModel();
+            model2.setNumRows(0);
+            invoiceNumber.setText("");
+            date.setText("");
+            customerName.setText("");
+            invoiceTotal.setText("");
         }else if(invoicesTable.getRowCount()==0){
             JOptionPane.showMessageDialog(
                     null,
@@ -142,7 +149,7 @@ public class Controller {
             }
     }
 
-    public void deleteItem(JTable itemsTable){
+    public void deleteItem(JTable itemsTable,JLabel invoiceTotal){
 
         DefaultTableModel model=(DefaultTableModel) itemsTable.getModel();
 
@@ -156,6 +163,8 @@ public class Controller {
                     for(int j=0;j<invoices.get(i).getItems().size();j++){
                         if(invoices.get(i).getItems().get(j).getItemName().equals(itemName)){
                             invoices.get(i).getItems().remove(j);
+                            String s=String.valueOf(invoices.get(i).getTotal());
+                            invoiceTotal.setText(s);
                             model.removeRow(itemsTable.getSelectedRow());
                             JOptionPane.showMessageDialog(
                                     null,
@@ -233,7 +242,7 @@ public class Controller {
             count.setText("");
         }
     }
-    public void confirmNewInvoice(JTextField invoiceNumber,JTextField date,JTextField customerName,JFrame frame){
+    public void confirmNewInvoice(JTextField invoiceNumber,JTextField date,JTextField customerName,JFrame frame,JTable invoicesTable){
 
         if(invoiceNumber.getText().equals("")) {
             JOptionPane.showMessageDialog(
@@ -273,12 +282,15 @@ public class Controller {
                     JOptionPane.INFORMATION_MESSAGE
             );
             frame.setVisible(false);
+            displayInvoicesTable(invoicesTable);
         }
     }
 
     //methods used in CreateItemFrame
 
-    public void confirmNewItem(JTextField invoiceNum,JTextField itemName,JTextField price,JTextField count,JFrame frame) {
+    public void confirmNewItem(JTextField invoiceNum,JTextField itemName,JTextField price,JTextField count,JFrame frame,
+                               JTable invoicesTable,JLabel invoiceNumber, JTextField date, JTextField customerName
+            , JLabel invoiceTotal, JTable itemsTable) {
 
         if(invoiceNum.getText().equals("")){
             JOptionPane.showMessageDialog(
@@ -323,6 +335,14 @@ public class Controller {
                    );
 
                    frame.setVisible(false);
+                   displayInvoicesTable(invoicesTable);
+
+                   DefaultTableModel model=(DefaultTableModel) itemsTable.getModel();
+                   model.setNumRows(0);
+                   invoiceNumber.setText("");
+                   date.setText("");
+                   customerName.setText("");
+                   invoiceTotal.setText("");
                }
            }
 
